@@ -1,17 +1,24 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import SearchFilter from './components/SearchFilter'
 import AddNew from './components/AddNew'
 import Numbers from './components/Numbers'
+import axios from 'axios'
 
 const App = () => {
-  const [ persons, setPersons ] = useState([
-    { name: 'Arto Hellas',
-      phone: '666-666-666'
-    }
-  ]) 
+  const [ persons, setPersons ] = useState([])
   const [ newName, setNewName ] = useState('')
   const [ newPhone, setNewPhone ] = useState('')
   const [ filterText, setNewFilter ] = useState('')
+
+  const hook = () => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+      })
+  }
+
+  useEffect(hook, [])
 
   const submitHandler = (event) => {
     event.preventDefault()
@@ -23,7 +30,8 @@ const App = () => {
     } else {
         let nameSubmit = {
           name: newName,
-          phone: newPhone
+          number: newPhone,
+          id: persons.length + 1
         }
         setPersons(persons.concat(nameSubmit))
         setNewName('')

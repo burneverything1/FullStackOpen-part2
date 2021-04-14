@@ -6,7 +6,7 @@ const Numbers = ({ personsToShow }) => {
             <h2>Numbers</h2>
             <ul>
                 {personsToShow.map(person => 
-                <li key={person.name}>{person.name}, {person.phone}</li>)}
+                <li key={person.name}>{person.name}, {person.number}</li>)}
             </ul>
         </>
     )
