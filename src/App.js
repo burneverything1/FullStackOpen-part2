@@ -1,75 +1,43 @@
-import React, { useEffect, useState } from 'react'
-import SearchFilter from './components/SearchFilter'
-import AddNew from './components/AddNew'
-import Numbers from './components/Numbers'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import Search from './components/Search'
+import ShowCountries from './components/ShowCountries'
 
 const App = () => {
-  const [ persons, setPersons ] = useState([])
-  const [ newName, setNewName ] = useState('')
-  const [ newPhone, setNewPhone ] = useState('')
-  const [ filterText, setNewFilter ] = useState('')
+  const [ countrySearch, setCountrySearch ] = useState('')
+  const [ countryList, setCountryList ] = useState([])
+  const [ filterCountries, setFiltered ] = useState([])
 
-  const hook = () => {
+  const searchChangeHandler = (event) => {
+    setCountrySearch(event.target.value)
+    setFiltered(countryList.filter(country => country.name.toLowerCase().includes(countrySearch)))
+  }
+
+  const getCountries = () => {
     axios
-      .get('http://localhost:3001/persons')
+      .get('https://restcountries.eu/rest/v2/all')
       .then(response => {
-        setPersons(response.data)
+        setCountryList(response.data)
       })
   }
 
-  useEffect(hook, [])
+  let displayMode = 0
 
-  const submitHandler = (event) => {
-    event.preventDefault()
-    //check if name is in phonebook
-    let names = persons.map(person => person.name)
-    console.log(names);
-    if (names.includes(newName)){
-      window.alert(`${newName} is already added`)
-    } else {
-        let nameSubmit = {
-          name: newName,
-          number: newPhone,
-          id: persons.length + 1
-        }
-        setPersons(persons.concat(nameSubmit))
-        setNewName('')
-        setNewPhone('')
-    }
+  if (filterCountries.length === 1){
+    displayMode = 1
+  } else if (filterCountries.length > 10){
+    displayMode = 2
+  } else {
+    displayMode = 3
   }
 
-  const nameChangeHandler = (event) => {
-    setNewName(event.target.value)
-  }
-
-  const phoneChangeHandler = (event) => {
-    setNewPhone(event.target.value)
-  }
-
-  const personsToShow = filterText.length > 0
-    ? persons.filter(person => person.name.toLowerCase().includes(filterText))
-    : persons
-
-  const filterChangeHandler = (event) => {
-    setNewFilter(event.target.value)
-  }
+  useEffect(getCountries, [])
 
   return (
-    <div>
-      <h2>Phonebook</h2>
-      <SearchFilter filterText={filterText} filterChangeHandler={filterChangeHandler}/>
-      <AddNew
-        submitHandler={submitHandler}
-        newName={newName}
-        nameChangeHandler={nameChangeHandler}
-        newPhone={newPhone}
-        phoneChangeHandler={phoneChangeHandler}
-      />
-      <Numbers
-        personsToShow={personsToShow}
-      />
-    </div>
+    <>
+      <Search value={countrySearch} onChange={searchChangeHandler}/>
+      <ShowCountries countries={filterCountries} displayMode={displayMode}/>
+    </>
   )
 }
 
