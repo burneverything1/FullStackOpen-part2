@@ -3,12 +3,15 @@ import SearchFilter from './components/SearchFilter'
 import AddNew from './components/AddNew'
 import Numbers from './components/Numbers'
 import phonebook from './services/phonebook'
+import Notification from './components/Notification'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
   const [ newName, setNewName ] = useState('')
   const [ newPhone, setNewPhone ] = useState('')
   const [ filterText, setNewFilter ] = useState('')
+  const [ notifMessage, setNotifMessage ] = useState(null)
+  const [ notifType, setNotifType ] = useState('')
 
   const submitHandler = (event) => {
     event.preventDefault()
@@ -20,7 +23,16 @@ const App = () => {
         const updatedPerson = {...alreadyPerson, phone: newPhone}
         phonebook
           .updatePerson(alreadyPerson.id, updatedPerson)
-          .then(() => loadPersons())
+          .then(() => {
+            loadPersons()
+            setNotifMessage(`${newName} has been updated in phonebook`)
+            setNotifType('green')
+            setNewName('')
+            setNewPhone('')
+            setTimeout(() => {
+              setNotifMessage(null)
+            }, 3000);
+          })
       }
     } else {
         let nameSubmit = {
@@ -31,6 +43,11 @@ const App = () => {
           .create(nameSubmit)
           .then(response => {
             setPersons(persons.concat(response.data))
+            setNotifMessage(`${newName} has been created in phonebook`)
+            setNotifType('green')
+            setTimeout(() => {
+              setNotifMessage(null)
+            }, 3000);
             setNewName('')
             setNewPhone('')
           })
@@ -67,13 +84,28 @@ const App = () => {
     if (window.confirm('Do you really want to delete this entry?')) {
       phonebook
       .deletePerson(id)
-      .then(() => loadPersons())
+      .then(() => {
+        loadPersons()
+        setNotifMessage(`Person deleted from phonebook`)
+        setNotifType('green')
+        setTimeout(() => {
+          setNotifMessage(null)
+        }, 3000);
+      })
+      .catch(error => {
+        setNotifMessage('Person has already been deleted from phonebook')
+        setNotifType('red')
+        setTimeout(() => {
+          setNotifMessage(null)
+        }, 3000);
+      })
     }
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notifMessage} type={notifType}/>
       <SearchFilter filterText={filterText} filterChangeHandler={filterChangeHandler}/>
       <AddNew
         submitHandler={submitHandler}
