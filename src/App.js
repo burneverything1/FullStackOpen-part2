@@ -3,7 +3,6 @@ import SearchFilter from './components/SearchFilter'
 import AddNew from './components/AddNew'
 import Numbers from './components/Numbers'
 import phonebook from './services/phonebook'
-import axios from 'axios'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
@@ -14,9 +13,15 @@ const App = () => {
   const submitHandler = (event) => {
     event.preventDefault()
     //check if name is in phonebook
-    let names = persons.map(person => person.name)
-    if (names.includes(newName)){
-      window.alert(`${newName} is already added`)
+    let personsNames = persons.map(person => person.name)
+    if (personsNames.includes(newName)){
+      let alreadyPerson = persons.find(person => person.name === newName)
+      if (window.confirm(`${newName} is already in the phonebook, replace the old number with a new one?`)) {
+        const updatedPerson = {...alreadyPerson, phone: newPhone}
+        phonebook
+          .updatePerson(alreadyPerson.id, updatedPerson)
+          .then(() => loadPersons())
+      }
     } else {
         let nameSubmit = {
           name: newName,
