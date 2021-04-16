@@ -3,6 +3,7 @@ import SearchFilter from './components/SearchFilter'
 import AddNew from './components/AddNew'
 import Numbers from './components/Numbers'
 import phonebook from './services/phonebook'
+import axios from 'axios'
 
 const App = () => {
   const [ persons, setPersons ] = useState([]) 
@@ -31,13 +32,15 @@ const App = () => {
     }
   }
 
-  useEffect(() => {
+  const loadPersons = () => {
     phonebook
       .getAll()
       .then(response => {
         setPersons(response.data)
       })
-  }, [])
+  }
+
+  useEffect(loadPersons, [])
 
   const nameChangeHandler = (event) => {
     setNewName(event.target.value)
@@ -55,6 +58,14 @@ const App = () => {
     setNewFilter(event.target.value)
   }
 
+  const deleteNumber = (id) => {
+    if (window.confirm('Do you really want to delete this entry?')) {
+      phonebook
+      .deletePerson(id)
+      .then(() => loadPersons())
+    }
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -68,6 +79,7 @@ const App = () => {
       />
       <Numbers
         personsToShow={personsToShow}
+        deleteNumber={deleteNumber}
       />
     </div>
   )
